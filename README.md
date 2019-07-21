@@ -1,6 +1,7 @@
 # KDU Survey Auto Complete Bot
 ## How to install
 ```
+cd kdusurveybot
 pip install -r requirements.txt
 ```
 
