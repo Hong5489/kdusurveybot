@@ -35,7 +35,7 @@ if __name__ == "__main__":
 	data = get_args(r.text,data)
 	r = s.post("http://survey.kdu.edu.my/Login2.aspx",data=data,cookies=cookies)
 	if r.text.find("Invalid Username Or Password") != -1:
-		print "Login failed"
+		print("Login failed")
 		os.sys.exit(0)
 	if settings.all:
 		subject_input = 0
@@ -46,18 +46,18 @@ if __name__ == "__main__":
 		if not settings.all:
 			subjects_name = re.findall("<span id=\"ctl00_CPH_main_GV_Surveys_ctl[0-9]+_lbl1\" ItemStyle-HorizontalAlign=\"Center\">(.*)</span>",r.text)
 			options = zip(subjects,subjects_name)
-			print "Subjects:\n"
+			print("Subjects:\n")
 			for i,o in enumerate(options):
-				print i,o[1]
+				print(i,o[1])
 			subject_input = int(input("Enter Subject ID: "))
 			if subject_input >= len(subjects) or subject_input < 0:
 				os.system('clear')
-				print "Invalid Subject ID!"
+				print("Invalid Subject ID!")
 				continue
 			rating_input = int(input("Enter rating (1-5): "))
 			if rating_input > 5 or rating_input < 0:
 				os.system('clear')
-				print "Invalid rating!"
+				print("Invalid rating!")
 				continue
 		data = {}
 		data = get_args(r.text,data)
@@ -116,5 +116,5 @@ if __name__ == "__main__":
 			if subject_input < len(subjects)-1:
 				subject_input += 1
 			else:
-				print "Done!"
+				print("Done!")
 				break
