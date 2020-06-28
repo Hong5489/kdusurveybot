@@ -5,9 +5,9 @@ import os
 import argparse
 
 def get_args(text,data):
-	args = re.findall("<input type=\"hidden\" .*/>",r.text)
+	args = re.findall("<input type=\"hidden\" .*/>",text)
 	for a in args:
-		data[str(re.findall("id=\"[A-Za-z0-9_]+\"",a)[0][4:-1])] = str(re.findall("value=\".*\"",a)[0][7:-1])
+		data[str(re.findall("id=\"([A-Za-z0-9_]+)\"",a)[0])] = str(re.findall("value=\"(.*)\"",a)[0])
 	return data
 
 if __name__ == "__main__":
@@ -22,9 +22,7 @@ if __name__ == "__main__":
 	cookies = r.cookies
 	data = {
 		'ctl00$CPH_main$CB_AutoLogin': 'on',
-		'ctl00$CPH_main$BTN_Submit': 'Proceed',
-		"__SCROLLPOSITIONX": 0,
-		"__SCROLLPOSITIONY": 0
+		'ctl00$CPH_main$BTN_Submit': 'Proceed'
 	}
 	data = get_args(r.text,data)
 	s.post("http://survey.kdu.edu.my/Login.aspx",data=data,cookies=cookies)
@@ -32,9 +30,7 @@ if __name__ == "__main__":
 	data = {
 		"ctl00$CPH_main$TB_UserName": settings.username,
 		"ctl00$CPH_main$TB_Password": settings.password,
-		"ctl00$CPH_main$BTN_Submit": "Proceed",
-		"__SCROLLPOSITIONX": 0,
-		"__SCROLLPOSITIONY": 0
+		"ctl00$CPH_main$BTN_Submit": "Proceed"
 	}
 	data = get_args(r.text,data)
 	r = s.post("http://survey.kdu.edu.my/Login2.aspx",data=data,cookies=cookies)
@@ -46,7 +42,7 @@ if __name__ == "__main__":
 		rating_input = int(settings.all)
 	while(1):
 		r = s.get("http://survey.kdu.edu.my/StudentSurveys.aspx",cookies=cookies)
-		subjects = [i[6:] for i in re.findall("name=\"ctl00\$CPH_main\$GV_Surveys\$ctl[0-9]+\$btnProcess",r.text)]
+		subjects = re.findall("name=\"(ctl00\$CPH_main\$GV_Surveys\$ctl[0-9]+\$btnProcess)",r.text)
 		if not settings.all:
 			subjects_name = re.findall("<span id=\"ctl00_CPH_main_GV_Surveys_ctl[0-9]+_lbl1\" ItemStyle-HorizontalAlign=\"Center\">(.*)</span>",r.text)
 			options = zip(subjects,subjects_name)
@@ -63,15 +59,12 @@ if __name__ == "__main__":
 				os.system('clear')
 				print "Invalid rating!"
 				continue
-		data = {
-		"__SCROLLPOSITIONX": 0,
-		"__SCROLLPOSITIONY": 0,
-		}
+		data = {}
 		data = get_args(r.text,data)
 		data["__EVENTTARGET"] = str(subjects[subject_input])
 		s.post("http://survey.kdu.edu.my/StudentSurveys.aspx",data=data,cookies=cookies)
 		r = s.get("http://survey.kdu.edu.my/survey.aspx",cookies=cookies)
-		ratings = [i for i in re.findall("__doPostBack\([A-Za-z0-9\$_,\'\\\\]+\)",r.text)]
+		ratings = re.findall("__doPostBack\([A-Za-z0-9\$_,\'\\\\]+\)",r.text)
 		questions = []
 		for rate in ratings:
 			questions.append(str(re.findall("ctl00\$CPH_main\$gvQuestion_Category\$ctl[0-9]+\$gvQuestion_SubCategory\$ctl[0-9]+\$gvQuestion\$ctl[0-9]+\$rbl5Answer",rate)[0]))
@@ -79,9 +72,7 @@ if __name__ == "__main__":
 		bar = IncrementalBar('Processing', max=len(questions))
 		data = {
 			"__LASTFOCUS":'',
-			"__ASYNCPOST": "true",
-			"__SCROLLPOSITIONX": 0,
-			"__SCROLLPOSITIONY": 0
+			"__ASYNCPOST": "true"
 		}
 		data = get_args(r.text,data)
 		data['ctl00$CPH_main$token_id'] = int(data.pop('ctl00_CPH_main_token_id'))
@@ -105,15 +96,20 @@ if __name__ == "__main__":
 			s.post("http://survey.kdu.edu.my/survey.aspx",headers=headers,data=data,cookies=cookies)
 			bar.next()
 		bar.finish()
+		data = {}
+		data = get_args(r.text,data)
+		data["__EVENTTARGET"] = str(subjects[subject_input])
+		s.post("http://survey.kdu.edu.my/StudentSurveys.aspx",data=data,cookies=cookies)
+		r = s.get("http://survey.kdu.edu.my/survey.aspx",cookies=cookies)
+
 		data = {
-			"__SCROLLPOSITIONX": 0,
-			"__SCROLLPOSITIONY": 0,
 			"ctl00$CPH_main$btnSubmit": "Complete"		
 		}
 		data = get_args(r.text,data)
 		data['ctl00$CPH_main$token_id'] = int(data.pop('ctl00_CPH_main_token_id'))
 		data['ctl00$CPH_main$attendance_id'] = int(data.pop('ctl00_CPH_main_attendance_id'))
 		s.post("http://survey.kdu.edu.my/survey.aspx",headers=headers,data=data,cookies=cookies)
+
 		if not settings.all:
 			os.system('clear')
 		if settings.all:
