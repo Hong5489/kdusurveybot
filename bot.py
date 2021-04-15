@@ -4,6 +4,8 @@ from progress.bar import IncrementalBar
 import os
 import argparse
 
+URL = "https://survey.uowmkdu.edu.my"
+
 def get_args(text,data):
 	args = re.findall("<input type=\"hidden\" .*/>",text)
 	for a in args:
@@ -18,22 +20,22 @@ if __name__ == "__main__":
 	settings = parser.parse_args()
 	os.system('clear')
 	s = requests.Session()
-	r = s.get("http://survey.kdu.edu.my/Login.aspx")
+	r = s.get(URL+"/Login.aspx")
 	cookies = r.cookies
 	data = {
 		'ctl00$CPH_main$CB_AutoLogin': 'on',
 		'ctl00$CPH_main$BTN_Submit': 'Proceed'
 	}
 	data = get_args(r.text,data)
-	s.post("http://survey.kdu.edu.my/Login.aspx",data=data,cookies=cookies)
-	r = s.get("http://survey.kdu.edu.my/Login2.aspx")
+	s.post(URL+"/Login.aspx",data=data,cookies=cookies)
+	r = s.get(URL+"/Login2.aspx")
 	data = {
 		"ctl00$CPH_main$TB_UserName": settings.username,
 		"ctl00$CPH_main$TB_Password": settings.password,
 		"ctl00$CPH_main$BTN_Submit": "Proceed"
 	}
 	data = get_args(r.text,data)
-	r = s.post("http://survey.kdu.edu.my/Login2.aspx",data=data,cookies=cookies)
+	r = s.post(URL+"/Login2.aspx",data=data,cookies=cookies)
 	if r.text.find("Invalid Username Or Password") != -1:
 		print("Login failed")
 		os.sys.exit(0)
@@ -41,7 +43,7 @@ if __name__ == "__main__":
 		subject_input = 0
 		rating_input = int(settings.all)
 	while(1):
-		r = s.get("http://survey.kdu.edu.my/StudentSurveys.aspx",cookies=cookies)
+		r = s.get(URL+"/StudentSurveys.aspx",cookies=cookies)
 		subjects = re.findall("name=\"(ctl00\$CPH_main\$GV_Surveys\$ctl[0-9]+\$btnProcess)",r.text)
 		if not settings.all:
 			subjects_name = re.findall("<span id=\"ctl00_CPH_main_GV_Surveys_ctl[0-9]+_lbl1\" ItemStyle-HorizontalAlign=\"Center\">(.*)</span>",r.text)
@@ -62,8 +64,8 @@ if __name__ == "__main__":
 		data = {}
 		data = get_args(r.text,data)
 		data["__EVENTTARGET"] = str(subjects[subject_input])
-		s.post("http://survey.kdu.edu.my/StudentSurveys.aspx",data=data,cookies=cookies)
-		r = s.get("http://survey.kdu.edu.my/survey.aspx",cookies=cookies)
+		s.post(URL+"/StudentSurveys.aspx",data=data,cookies=cookies)
+		r = s.get(URL+"/survey.aspx",cookies=cookies)
 		ratings = re.findall("__doPostBack\([A-Za-z0-9\$_,\'\\\\]+\)",r.text)
 		questions = []
 		for rate in ratings:
@@ -93,14 +95,14 @@ if __name__ == "__main__":
 				'Connection': 'keep-alive',
 				'X-MicrosoftAjax': 'Delta=true' 
 			}
-			s.post("http://survey.kdu.edu.my/survey.aspx",headers=headers,data=data,cookies=cookies)
+			s.post(URL+"/survey.aspx",headers=headers,data=data,cookies=cookies)
 			bar.next()
 		bar.finish()
 		data = {}
 		data = get_args(r.text,data)
 		data["__EVENTTARGET"] = str(subjects[subject_input])
-		s.post("http://survey.kdu.edu.my/StudentSurveys.aspx",data=data,cookies=cookies)
-		r = s.get("http://survey.kdu.edu.my/survey.aspx",cookies=cookies)
+		s.post(URL+"/StudentSurveys.aspx",data=data,cookies=cookies)
+		r = s.get(URL+"/survey.aspx",cookies=cookies)
 
 		data = {
 			"ctl00$CPH_main$btnSubmit": "Complete"		
@@ -108,7 +110,7 @@ if __name__ == "__main__":
 		data = get_args(r.text,data)
 		data['ctl00$CPH_main$token_id'] = int(data.pop('ctl00_CPH_main_token_id'))
 		data['ctl00$CPH_main$attendance_id'] = int(data.pop('ctl00_CPH_main_attendance_id'))
-		s.post("http://survey.kdu.edu.my/survey.aspx",headers=headers,data=data,cookies=cookies)
+		s.post(URL+"/survey.aspx",headers=headers,data=data,cookies=cookies)
 
 		if not settings.all:
 			os.system('clear')
