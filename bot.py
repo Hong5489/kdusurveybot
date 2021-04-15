@@ -84,14 +84,14 @@ if __name__ == "__main__":
 			data[q] = rating_input
 			data['__EVENTTARGET'] = q + "$" + str(rating_input-1)
 			headers = {
-				'Origin': 'http://survey.kdu.edu.my',
+				'Origin': URL,
 				'Accept-Encoding': 'gzip, deflate',
 				'Accept-Language':'en-US,en;q=0.9',
 				'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36',
 				'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
 				'Accept': '*/*',
 				'Cache-Control': 'no-cache',
-				'Referer': 'http://survey.kdu.edu.my/survey.aspx',
+				'Referer': URL+'/survey.aspx',
 				'Connection': 'keep-alive',
 				'X-MicrosoftAjax': 'Delta=true' 
 			}
