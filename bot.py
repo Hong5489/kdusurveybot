@@ -27,7 +27,7 @@ if __name__ == "__main__":
 		'ctl00$CPH_main$BTN_Submit': 'Proceed'
 	}
 	data = get_args(r.text,data)
-	s.post(URL+"/Login.aspx",data=data,cookies=cookies)
+	s.post(URL+"/Login.aspx",data=data)
 	r = s.get(URL+"/Login2.aspx")
 	data = {
 		"ctl00$CPH_main$TB_UserName": settings.username,
@@ -35,7 +35,7 @@ if __name__ == "__main__":
 		"ctl00$CPH_main$BTN_Submit": "Proceed"
 	}
 	data = get_args(r.text,data)
-	r = s.post(URL+"/Login2.aspx",data=data,cookies=cookies)
+	r = s.post(URL+"/Login2.aspx",data=data)
 	if r.text.find("Invalid Username Or Password") != -1:
 		print("Login failed")
 		os.sys.exit(0)
@@ -43,12 +43,13 @@ if __name__ == "__main__":
 		subject_input = 0
 		rating_input = int(settings.all)
 	while(1):
-		r = s.get(URL+"/StudentSurveys.aspx",cookies=cookies)
+		r = s.get(URL+"/StudentSurveys.aspx")
 		subjects = re.findall("name=\"(ctl00\$CPH_main\$GV_Surveys\$ctl[0-9]+\$btnProcess)",r.text)
 		if not settings.all:
-			subjects_name = re.findall("<span id=\"ctl00_CPH_main_GV_Surveys_ctl[0-9]+_lbl1\" ItemStyle-HorizontalAlign=\"Center\">(.*)</span>",r.text)
+			subjects_name = re.findall("<span id=\"CPH_main_GV_Surveys_lbl1_[0-9]+\" ItemStyle-HorizontalAlign=\"Center\">(.*)</span>",r.text)
 			options = zip(subjects,subjects_name)
 			print("Subjects:\n")
+
 			for i,o in enumerate(options):
 				print(i,o[1])
 			subject_input = int(input("Enter Subject ID: "))
@@ -64,53 +65,54 @@ if __name__ == "__main__":
 		data = {}
 		data = get_args(r.text,data)
 		data["__EVENTTARGET"] = str(subjects[subject_input])
-		s.post(URL+"/StudentSurveys.aspx",data=data,cookies=cookies)
-		r = s.get(URL+"/survey.aspx",cookies=cookies)
-		ratings = re.findall("__doPostBack\([A-Za-z0-9\$_,\'\\\\]+\)",r.text)
+		s.post(URL+"/StudentSurveys.aspx",data=data)
+		r = s.get(URL+"/survey.aspx")
+		ratings = re.findall("__doPostBack\(.*, 0\)",r.text)
 		questions = []
 		for rate in ratings:
 			questions.append(str(re.findall("ctl00\$CPH_main\$gvQuestion_Category\$ctl[0-9]+\$gvQuestion_SubCategory\$ctl[0-9]+\$gvQuestion\$ctl[0-9]+\$rbl5Answer",rate)[0]))
 		questions = list(set(questions))
 		bar = IncrementalBar('Processing', max=len(questions))
 		data = {
-			"__LASTFOCUS":'',
-			"__ASYNCPOST": "true"
+			"__LASTFOCUS":''
 		}
 		data = get_args(r.text,data)
-		data['ctl00$CPH_main$token_id'] = int(data.pop('ctl00_CPH_main_token_id'))
-		data['ctl00$CPH_main$attendance_id'] = int(data.pop('ctl00_CPH_main_attendance_id'))
-		for q in questions:
-			data['ctl00$CPH_main$ScriptManager1'] = "ctl00$CPH_main$ScriptManager1|" + q + "$" + str(rating_input-1)
-			data[q] = rating_input
-			data['__EVENTTARGET'] = q + "$" + str(rating_input-1)
-			headers = {
+
+		data['ctl00$CPH_main$token_id'] = int(data.pop('CPH_main_token_id'))
+		data['ctl00$CPH_main$attendance_id'] = int(data.pop('CPH_main_attendance_id'))
+		headers = {
 				'Origin': URL,
 				'Accept-Encoding': 'gzip, deflate',
 				'Accept-Language':'en-US,en;q=0.9',
-				'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36',
+				'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36',
 				'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
 				'Accept': '*/*',
 				'Cache-Control': 'no-cache',
 				'Referer': URL+'/survey.aspx',
-				'Connection': 'keep-alive',
-				'X-MicrosoftAjax': 'Delta=true' 
+				'Connection': 'keep-alive'
 			}
-			s.post(URL+"/survey.aspx",headers=headers,data=data,cookies=cookies)
+
+		for q in questions:
+			# data['ctl00$CPH_main$ScriptManager1'] = "ctl00$CPH_main$ScriptManager1|" + q + "$" + str(rating_input-1)
+			data[q] = rating_input
+			data['__EVENTTARGET'] = q + "$" + str(rating_input-1)
+			
+			s.post(URL+"/survey.aspx",headers=headers,data=data)
 			bar.next()
 		bar.finish()
 		data = {}
 		data = get_args(r.text,data)
 		data["__EVENTTARGET"] = str(subjects[subject_input])
-		s.post(URL+"/StudentSurveys.aspx",data=data,cookies=cookies)
-		r = s.get(URL+"/survey.aspx",cookies=cookies)
+		s.post(URL+"/StudentSurveys.aspx",data=data)
+		r = s.get(URL+"/survey.aspx")
 
 		data = {
 			"ctl00$CPH_main$btnSubmit": "Complete"		
 		}
 		data = get_args(r.text,data)
-		data['ctl00$CPH_main$token_id'] = int(data.pop('ctl00_CPH_main_token_id'))
-		data['ctl00$CPH_main$attendance_id'] = int(data.pop('ctl00_CPH_main_attendance_id'))
-		s.post(URL+"/survey.aspx",headers=headers,data=data,cookies=cookies)
+		data['ctl00$CPH_main$token_id'] = int(data.pop('CPH_main_token_id'))
+		data['ctl00$CPH_main$attendance_id'] = int(data.pop('CPH_main_attendance_id'))
+		s.post(URL+"/survey.aspx",headers=headers,data=data)
 
 		if not settings.all:
 			os.system('clear')
