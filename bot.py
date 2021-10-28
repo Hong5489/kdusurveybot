@@ -35,6 +35,7 @@ if __name__ == "__main__":
 		"ctl00$CPH_main$BTN_Submit": "Proceed"
 	}
 	data = get_args(r.text,data)
+	# Logging in with student id and password
 	r = s.post(URL+"/Login2.aspx",data=data)
 	if r.text.find("Invalid Username Or Password") != -1:
 		print("Login failed")
@@ -46,6 +47,7 @@ if __name__ == "__main__":
 		r = s.get(URL+"/StudentSurveys.aspx")
 		subjects = re.findall("name=\"(ctl00\$CPH_main\$GV_Surveys\$ctl[0-9]+\$btnProcess)",r.text)
 		if not settings.all:
+			# Get all subject name
 			subjects_name = re.findall("<span id=\"CPH_main_GV_Surveys_lbl1_[0-9]+\" ItemStyle-HorizontalAlign=\"Center\">(.*)</span>",r.text)
 			options = zip(subjects,subjects_name)
 			print("Subjects:\n")
@@ -92,6 +94,7 @@ if __name__ == "__main__":
 				'Connection': 'keep-alive'
 			}
 
+		# Rating each question with rating given
 		for q in questions:
 			# data['ctl00$CPH_main$ScriptManager1'] = "ctl00$CPH_main$ScriptManager1|" + q + "$" + str(rating_input-1)
 			data[q] = rating_input
@@ -106,6 +109,7 @@ if __name__ == "__main__":
 		s.post(URL+"/StudentSurveys.aspx",data=data)
 		r = s.get(URL+"/survey.aspx")
 
+		# Submit the survey form
 		data = {
 			"ctl00$CPH_main$btnSubmit": "Complete"		
 		}
